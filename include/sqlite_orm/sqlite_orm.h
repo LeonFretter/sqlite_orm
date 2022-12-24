@@ -13801,6 +13801,14 @@ namespace sqlite_orm {
                 this->rename_table(this->get_connection().get(), from, to);
             }
 
+            connection_ref get_connection() {
+                connection_ref res{*this->connection};
+                if(1 == this->connection->retain_count()) {
+                    this->on_open_internal(this->connection->get());
+                }
+                return res;
+            }
+
           protected:
             void rename_table(sqlite3* db, const std::string& oldName, const std::string& newName) const {
                 std::stringstream ss;
@@ -14271,14 +14279,6 @@ namespace sqlite_orm {
                 }
                 sqlite3* db = this->connection->get();
                 perform_void_exec(db, query);
-            }
-
-            connection_ref get_connection() {
-                connection_ref res{*this->connection};
-                if(1 == this->connection->retain_count()) {
-                    this->on_open_internal(this->connection->get());
-                }
-                return res;
             }
 
 #if SQLITE_VERSION_NUMBER >= 3006019
